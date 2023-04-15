@@ -1,4 +1,4 @@
-# Auto-LLM
+# Agent-LLM
 ## AI-Powered Task Management System
 
 This repository contains a Python script for an AI-powered task management system that uses Large Language Models (LLMs) to create, prioritize, and execute tasks. The system is designed to create new tasks based on the results of previous tasks and a predefined objective. It uses the natural language processing (NLP) capabilities of various LLMs and your choice of Vector Database to store and retrieve task results for context. This version is based on the original [BabyAGI](https://github.com/yoheinakajima/babyagi)  but adds support for different VectorDB providers, LLM providers, models, and custom prompting per model.
