@@ -3,10 +3,12 @@ import os
 import subprocess
 import time
 import requests
+import numpy as np
 from collections import deque
 from typing import Dict, List
 import importlib
-
+import torch
+from transformers import LongformerTokenizer, LongformerModel
 import openai
 import pinecone
 from dotenv import load_dotenv
@@ -15,6 +17,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Engine configuration
+
+USE_LOCAL_EMBEDDING = os.getenv("USE_LOCAL_EMBEDDINGS", "false")
+if USE_LOCAL_EMBEDDING.lower() == "true":
+    tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
+    model = LongformerModel.from_pretrained('allenai/longformer-base-4096')
 
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -90,13 +97,6 @@ if DOTENV_EXTENSIONS:
 assert OBJECTIVE, "OBJECTIVE environment variable is missing from .env"
 assert INITIAL_TASK, "INITIAL_TASK environment variable is missing from .env"
 
-if "gpt-4" in OPENAI_API_MODEL.lower():
-    print(
-        "\033[91m\033[1m"
-        + "\n*****USING GPT-4. POTENTIALLY EXPENSIVE. MONITOR YOUR COSTS*****"
-        + "\033[0m\033[0m"
-    )
-
 # Print OBJECTIVE
 print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
 print(f"{OBJECTIVE}")
@@ -123,16 +123,30 @@ index = pinecone.Index(table_name)
 # Task list
 task_list = deque([])
 
-
 def add_task(task: Dict):
     task_list.append(task)
 
-
-def get_ada_embedding(text):
+def get_embedding(text, chunk_size=4096):
     text = text.replace("\n", " ")
-    return openai.Embedding.create(input=[text], model="text-embedding-ada-002")[
-        "data"
-    ][0]["embedding"]
+    def process_openai_embedding_chunk(chunk_text):
+        return openai.Embedding.create(input=[chunk_text], model="text-embedding-ada-002")["data"][0]["embedding"]
+    
+    # Split the text into smaller chunks
+    chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+    if USE_LOCAL_EMBEDDING.lower() == "true":
+        all_embeddings = []
+        for chunk in chunks:
+            input_ids = tokenizer.encode(chunk, max_length=chunk_size, truncation=True, return_tensors='pt')
+            with torch.no_grad():
+                outputs = model(input_ids)
+                embeddings = outputs.last_hidden_state[:, 0, :].numpy()
+                all_embeddings.append(embeddings[0])
+    else:
+        # Get embeddings for each chunk using OpenAI API
+        all_embeddings = [process_openai_embedding_chunk(chunk) for chunk in chunks]
+    # Average the embeddings
+    averaged_embedding = np.mean(all_embeddings, axis=0)
+    return averaged_embedding
 
 
 def openai_call(
@@ -283,7 +297,7 @@ def context_agent(query: str, top_results_num: int):
         list: A list of tasks as context for the given query, sorted by relevance.
 
     """
-    query_embedding = get_ada_embedding(query)
+    query_embedding = get_embedding(query)
     results = index.query(query_embedding, top_k=top_results_num, include_metadata=True, namespace=OBJECTIVE)
     # print("***** RESULTS *****")
     # print(results)
@@ -320,9 +334,7 @@ while True:
             "data": result
         }  # This is where you should enrich the result if needed
         result_id = f"result_{task['task_id']}"
-        vector = get_ada_embedding(
-            enriched_result["data"]
-        )  # get vector of the actual result extracted from the dictionary
+        vector = get_embedding(enriched_result["data"])  # get vector of the actual result extracted from the dictionary
         index.upsert(
             [(result_id, vector, {"task": task["task_name"], "result": result})],
 	    namespace=OBJECTIVE
