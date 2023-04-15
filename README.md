@@ -12,8 +12,8 @@ This repository contains a Python script for an AI-powered task management syste
 1. Clone this repository:
 
 ```
-git clone https://github.com/Josh-XT/Auto-LLM
-cd Auto-LLM
+git clone https://github.com/Josh-XT/Agent-LLM
+cd Agent-LLM
 ``` 
 2. Install the required Python libraries:
 
