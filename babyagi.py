@@ -4,8 +4,6 @@ import time
 from collections import deque
 from typing import Dict, List
 import importlib
-from transformers import LongformerTokenizer, LongformerModel
-import openai
 from dotenv import load_dotenv
 from provider import __getattr__ as provider
 from vectordb import __getattr__ as vectordb
