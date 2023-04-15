@@ -12,4 +12,4 @@ env/
 .idea/
 
 models
-llama/
+llama.cpp

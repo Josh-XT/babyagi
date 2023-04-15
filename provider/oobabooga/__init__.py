@@ -13,7 +13,7 @@ if AI_PROVIDER == "oobabooga":
     def custom_embedding(text):
         return get_embedding(text)
 
-def chat(model, prompt, temperature, max_tokens):
+def instruct(model, prompt, temperature, max_tokens):
     response = requests.post("http://localhost:7860/run/textgen", json={
         "data": [
             [

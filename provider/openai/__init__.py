@@ -1,9 +1,13 @@
 import openai
 import os
 import numpy as np
+from dotenv import load_dotenv
+load_dotenv()
+AI_PROVIDER = os.getenv("AI_PROVIDER")
 AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-if OPENAI_API_KEY:
+
+if AI_PROVIDER == "openai":
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
     assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
     openai.api_key = OPENAI_API_KEY
@@ -13,7 +17,8 @@ if OPENAI_API_KEY:
             + "\n*****USING GPT-4. POTENTIALLY EXPENSIVE. MONITOR YOUR COSTS*****"
             + "\033[0m\033[0m"
         )
-def chat(model, prompt, temperature, max_tokens):
+
+def instruct(model, prompt, temperature, max_tokens):
     if not model.startswith("gpt-"):
         # Use completion API
         response = openai.Completion.create(

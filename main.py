@@ -21,7 +21,7 @@ INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
 # Model configuration
 AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.0))
 
-chat = provider(AI_PROVIDER).chat
+instruct = provider(AI_PROVIDER).instruct
 get_embedding = provider(AI_PROVIDER).get_embedding
 get_index = vectordb(VECTORDB_PROVIDER).get_index
 results = vectordb(VECTORDB_PROVIDER).results
@@ -86,8 +86,7 @@ def ai_call(
 ):
     while True:
         try:
-            # Get the function "chat" from provider/openai/__init__.py and call it
-            return chat(prompt, model, temperature, max_tokens)
+            return instruct(prompt, model, temperature, max_tokens)
         except Exception as e:
             print(f"Error: {e}")
             time.sleep(10)  # Wait 10 seconds and try again
