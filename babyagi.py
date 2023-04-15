@@ -23,12 +23,14 @@ if USE_LOCAL_EMBEDDING.lower() == "true":
     tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
     model = LongformerModel.from_pretrained('allenai/longformer-base-4096')
 
-# API Keys
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
-
 OPENAI_API_MODEL = os.getenv("OPENAI_API_MODEL", "gpt-3.5-turbo")
 assert OPENAI_API_MODEL, "OPENAI_API_MODEL environment variable is missing from .env"
+
+# If using OpenAI API, set the API key
+if OPENAI_API_MODEL.startswith("gpt-"):
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
+    openai.api_key = OPENAI_API_KEY
 
 if "gpt-4" in OPENAI_API_MODEL.lower():
     print(
@@ -104,7 +106,7 @@ print(f"{OBJECTIVE}")
 print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {INITIAL_TASK}")
 
 # Configure OpenAI and Pinecone
-openai.api_key = OPENAI_API_KEY
+
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
 # Create Pinecone index
