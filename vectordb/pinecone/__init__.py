@@ -2,10 +2,12 @@ import pinecone
 import os
 from dotenv import load_dotenv
 load_dotenv()
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
-PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT", "")
-OBJECTIVE = os.getenv("OBJECTIVE")
-if PINECONE_API_KEY:
+VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
+
+if VECTORDB_PROVIDER.lower() == "pinecone":
+    PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
+    PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT", "")
+    OBJECTIVE = os.getenv("OBJECTIVE")
     # Table config
     table_name = os.getenv("TABLE_NAME", "")
     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
