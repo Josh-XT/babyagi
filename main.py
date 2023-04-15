@@ -7,13 +7,14 @@ import importlib
 from dotenv import load_dotenv
 from provider import __getattr__ as provider
 from vectordb import __getattr__ as vectordb
+from embedding import __getattr__ as embedding
 # Load default environment variables (.env)
 load_dotenv()
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
 VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
 AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
-
+EMBEDDING = os.getenv("EMBEDDING", "openai")
 # Goal configuation
 OBJECTIVE = os.getenv("OBJECTIVE", "")
 INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
@@ -23,7 +24,7 @@ AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
 
 try:
     instruct = provider(AI_PROVIDER).instruct
-    get_embedding = provider(AI_PROVIDER).get_embedding
+    get_embedding = embedding(AI_PROVIDER).get_embedding
     get_index = vectordb(VECTORDB_PROVIDER).get_index
     results = vectordb(VECTORDB_PROVIDER).results
     store_results = vectordb(VECTORDB_PROVIDER).store_results
