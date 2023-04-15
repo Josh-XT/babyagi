@@ -115,10 +115,10 @@ if PINECONE_API_KEY:
     index = pinecone.Index(table_name)
 else:
     index = FAISS.from_texts(
-    texts=["_"],
-    embedding=model,
-    metadatas=[{"task": INITIAL_TASK}]
-)
+        texts=["_"],
+        embedding=model,
+        metadatas=[{"task": INITIAL_TASK}]
+    )
 
 # Task list
 task_list = deque([])
