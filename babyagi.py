@@ -18,8 +18,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set your AI Model to use. You can use any of the models listed here:
-# Set to "ooba-MODELNAME" for the Oobabooga Text Generation Web UI server 
-#   and replace MODELNAME with the model name to get desired prompts.
+# Set to "ooba-vicuna" for the Oobabooga Text Generation Web UI server 
+#   and replace vicuna with the model name to get desired prompts from the prompts/ooba-vicuna folder.
+#   If running ooba, the server needs to be started with the flags "--model YOUR-MODEL-NAME --listen --no-stream"
 AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
 
 # Engine configuration
@@ -226,11 +227,11 @@ def ai_call(
 def get_prompt(prompt_name: str):
     if OPENAI_API_KEY:
         # Get content from promts/{model}/{prompt_name}.txt
-        with open(f"prompts/openai/{prompt_name}.txt", "r") as f:
+        with open(f"ai_services/openai/prompts/{prompt_name}.txt", "r") as f:
             prompt = f.read()
         return prompt
     else:
-        with open(f"prompts/{AI_MODEL}/{prompt_name}.txt", "r") as f:
+        with open(f"ai_services/{AI_MODEL}/prompts/{prompt_name}.txt", "r") as f:
             prompt = f.read()
     return prompt
 
