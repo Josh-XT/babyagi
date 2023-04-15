@@ -11,7 +11,7 @@ from vectordb import __getattr__ as vectordb
 load_dotenv()
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
-VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "Pinecone")
+VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
 AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
 
 # Goal configuation

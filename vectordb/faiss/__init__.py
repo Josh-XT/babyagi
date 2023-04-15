@@ -3,7 +3,7 @@ from langchain.vectorstores import FAISS
 from transformers import LongformerTokenizer, LongformerModel
 from dotenv import load_dotenv
 load_dotenv()
-VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "FAISS")
+VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "faiss")
 
 if VECTORDB_PROVIDER.lower() == "pinecone":
     tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
