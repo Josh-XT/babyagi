@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from transformers import LongformerTokenizer, LongformerModel
 
-class LongformerEmbedding:
+class Embedding:
     def __init__(self, chunk_size=4096):
         self.chunk_size = chunk_size
         self.tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')

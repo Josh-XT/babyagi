@@ -1,9 +1,9 @@
 import os
 from langchain.vectorstores import FAISS
 from transformers import LongformerTokenizer, LongformerModel
-from main import CFG
-
-class FaissVectorDB:
+from Config import Config
+CFG = Config()
+class VectorDB:
     def __init__(self):
         if self.VECTORDB_PROVIDER.lower() == "pinecone":
             self.tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')

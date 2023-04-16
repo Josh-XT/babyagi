@@ -1,6 +1,6 @@
 import requests
 
-class OobaboogaProvider:
+class AIProvider:
     def __init__(self, temperature, max_tokens):
         self.temperature = temperature
         self.max_tokens = max_tokens

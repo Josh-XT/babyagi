@@ -1,6 +1,7 @@
 import openai
-from main import CFG
-class OpenAIProvider:
+from Config import Config
+CFG = Config()
+class AIProvider:
     def __init__(self, model, temperature, max_tokens):
         self.model = model
         self.temperature = temperature

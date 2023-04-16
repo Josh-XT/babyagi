@@ -1,7 +1,8 @@
 import pinecone
-from main import CFG
+from Config import Config
+CFG = Config()
 
-class PineconeVectorDB:
+class VectorDB:
     def __init__(self):
         if CFG.VECTORDB_PROVIDER.lower() == "pinecone":
             pinecone.init(api_key=CFG.PINECONE_API_KEY, environment=CFG.PINECONE_ENVIRONMENT)

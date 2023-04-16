@@ -1,7 +1,8 @@
 import openai
 import numpy as np
-from main import CFG
-class OpenAIEmbedding:
+from Config import Config
+CFG = Config()
+class Embedding:
     def __init__(self, chunk_size=4096):
         self.chunk_size = chunk_size
         openai.api_key = CFG.OPENAI_API_KEY
