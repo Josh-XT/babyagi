@@ -43,7 +43,7 @@ The script can be configured through environment variables in the `.env` file, c
 For more advanced configuration, you can enable command line arguments or dotenv extensions, which can override any environment variables.
 ### Adding Custom Plugins
 
-Follow the instructions in the [Adding Custom Plugins](/blob/main/PLUGINS.md)  section to add custom AI modules, VectorDB modules, and embedding modules to Agent-LLM.
+Follow the instructions in the [Adding Custom Plugins](PLUGINS.md)  section to add custom AI modules, VectorDB modules, and embedding modules to Agent-LLM.
 ### Provider-specific Instructions
 
 Instructions for setting up and configuring each AI provider and VectorDB provider can be found in their respective folders within the "provider" and "vectordb" directories. For example, to set up the "openai" AI provider, refer to the README file within the "provider/openai" folder. Similarly, for setting up the "Pinecone" VectorDB provider, consult the README file within the "vectordb/Pinecone" folder.
