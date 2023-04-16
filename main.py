@@ -54,7 +54,7 @@ def ai_call(
             break
 
 def get_prompt(prompt_name: str):
-    with open(f"provider/{CFG.AI_PROVIDER}/{CFG.AI_MODEL}/{prompt_name}.txt", "r") as f:
+    with open(f"model-prompts/{CFG.AI_MODEL}/{prompt_name}.txt", "r") as f:
         prompt = f.read()
     return prompt
 
