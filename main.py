@@ -22,8 +22,8 @@ try:
     get_embedding = embedding_instance.get_embedding
     results = vectordb_instance.results
     store_results = vectordb_instance.store_results
-except:
-    print("Error: AI_PROVIDER or VECTORDB_PROVIDER unable to load. Check your .env file.")
+except Exception as e:
+    print(f"Error: AI_PROVIDER or VECTORDB_PROVIDER unable to load. Check your .env file. {e}")
     exit()
 
 # Print OBJECTIVE
