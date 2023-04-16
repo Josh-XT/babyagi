@@ -5,7 +5,7 @@ from Config import Config
 CFG = Config()
 class VectorDB:
     def __init__(self):
-        if self.VECTORDB_PROVIDER.lower() == "pinecone":
+        if CFG.VECTORDB_PROVIDER.lower() == "faiss":
             self.tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
             self.model = LongformerModel.from_pretrained('allenai/longformer-base-4096')
             self.index = FAISS.from_texts(
