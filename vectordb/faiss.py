@@ -8,6 +8,7 @@ class VectorDB:
         if CFG.VECTORDB_PROVIDER.lower() == "faiss":
             self.tokenizer = LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')
             self.model = LongformerModel.from_pretrained('allenai/longformer-base-4096')
+            self.model.config.output_hidden_states = True
             self.index = FAISS.from_texts(
                 texts=["_"],
                 embedding=self.model,
