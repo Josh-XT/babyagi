@@ -6,7 +6,7 @@ from typing import Dict, List
 import importlib
 from dotenv import load_dotenv
 from provider.openai import instruct
-from vectordb.pinecone import get_index, results, store_results
+from vectordb.pinecone import results, store_results
 from embedding.openai import get_embedding
 
 # Load default environment variables (.env)
@@ -31,7 +31,6 @@ try:
     # Get the functions from the modules
     instruct = ai_module.instruct
     get_embedding = embedding_module.get_embedding
-    get_index = vectordb_module.get_index
     results = vectordb_module.results
     store_results = vectordb_module.store_results
 except:

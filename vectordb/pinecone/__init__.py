@@ -27,7 +27,7 @@ def results(query, top_results_num):
     sorted_results = sorted(results.matches, key=lambda x: x.score, reverse=True)
     return [(str(item.metadata["task"])) for item in sorted_results]
 
-def enrich_results(result_id, vector, result, task):
+def store_results(result_id, vector, result, task):
     index.upsert(
         [(result_id, vector, {"task": task["task_name"], "result": result})],
         namespace=OBJECTIVE
