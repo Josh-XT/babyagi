@@ -43,7 +43,11 @@ The script can be configured through environment variables in the `.env` file, c
 For more advanced configuration, you can enable command line arguments or dotenv extensions, which can override any environment variables.
 ### Adding Custom Plugins
 
-Follow the instructions in the [Adding Custom Plugins](PLUGINS.md)  section to add custom AI modules, VectorDB modules, and embedding modules to Agent-LLM.
+Follow the instructions in the [Adding Custom Plugins](https://chat.openai.com/c/PLUGINS.md)  section to add custom AI modules, VectorDB modules, and embedding modules to Agent-LLM.
+### Custom Prompts
+
+[Adding Per Model Prompts](PROMPTS.md) file for the format of custom prompts per model.
+- For custom prompts per model, refer to the [PROMPTS.md](PROMPTS.md) file for the format. You can add your prompts to `provider/YOUR-AI-PROVIDER/YOUR-AI-MODEL/` folder.
 ### Provider-specific Instructions
 
 Instructions for setting up and configuring each AI provider and VectorDB provider can be found in their respective folders within the "provider" and "vectordb" directories. For example, to set up the "openai" AI provider, refer to the README file within the "provider/openai" folder. Similarly, for setting up the "Pinecone" VectorDB provider, consult the README file within the "vectordb/Pinecone" folder.
@@ -56,14 +60,6 @@ Instructions for setting up and configuring each AI provider and VectorDB provid
 - `INITIAL_TASK`: The first task to be executed by the AI. 
 - `AI_TEMPERATURE`: The AI's temperature setting, affecting randomness in responses. (Default: 0.0) 
 - `ENABLE_COMMAND_LINE_ARGS`: Enable or disable the use of command line arguments. (Default: "false")
-## Adding Custom Plugins
-
-To add custom plugins for AI modules, VectorDB modules, or embedding modules, follow these steps: 
-- 1. **Create a new folder for your custom plugin** : Create a new folder inside the corresponding directory (`provider` for AI modules, `vectordb` for VectorDB modules, or `embedding` for embedding modules). Name the folder according to your custom plugin. 
-1. **Implement the required classes and methods** : In the new folder, create an `__init__.py` file and any other necessary Python files. Implement the required classes and methods based on the specific module you are adding. For example, for AI modules, you should implement a class that extends the base `AIProvider` class and overrides its methods. 
-2. **Add a README file** : Add a README.md file to your custom plugin's folder, detailing how to set up and use your custom plugin with Agent-LLM. Include any necessary configuration steps, such as setting environment variables or installing additional dependencies. 
-3. **Update Agent-LLM's configuration** : In the `.env` file or through command line arguments, set the corresponding environment variables (`AI_PROVIDER`, `VECTORDB_PROVIDER`, or `EMBEDDING_PROVIDER`) to the name of your custom plugin's folder. 
-4. **Test your custom plugin** : Run the main script (`python main.py`) and verify that your custom plugin is working as expected. Make any necessary adjustments to your plugin's code and configuration to ensure proper functionality.
 ## Contributing
 
 Contributions to this project are welcome! Please feel free to open an issue or submit a pull request if you have any improvements, bug fixes, or feature requests.
