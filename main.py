@@ -6,25 +6,22 @@ import importlib
 from Config import Config
 CFG = Config()
 
-try:
-    # Import the providers dynamically
-    ai_module = importlib.import_module(f"provider.{CFG.AI_PROVIDER}")
-    vectordb_module = importlib.import_module(f"vectordb.{CFG.VECTORDB_PROVIDER}")
-    embedding_module = importlib.import_module(f"embedding.{CFG.EMBEDDING}")
 
-    # Instantiate classes
-    ai_instance = ai_module.AIProvider(CFG.AI_MODEL, CFG.AI_TEMPERATURE, CFG.MAX_TOKENS)
-    embedding_instance = embedding_module.Embedding()
-    vectordb_instance = vectordb_module.VectorDB()
+# Import the providers dynamically
+ai_module = importlib.import_module(f"provider.{CFG.AI_PROVIDER}")
+vectordb_module = importlib.import_module(f"vectordb.{CFG.VECTORDB_PROVIDER}")
+embedding_module = importlib.import_module(f"embedding.{CFG.EMBEDDING}")
 
-    # Get the methods from the instances
-    instruct = ai_instance.instruct
-    get_embedding = embedding_instance.get_embedding
-    results = vectordb_instance.results
-    store_results = vectordb_instance.store_results
-except Exception as e:
-    print(f"Error: AI_PROVIDER or VECTORDB_PROVIDER unable to load. Check your .env file. {e}")
-    exit()
+# Instantiate classes
+ai_instance = ai_module.AIProvider()
+embedding_instance = embedding_module.Embedding()
+vectordb_instance = vectordb_module.VectorDB()
+
+# Get the methods from the instances
+instruct = ai_instance.instruct
+get_embedding = embedding_instance.get_embedding
+results = vectordb_instance.results
+store_results = vectordb_instance.store_results
 
 # Print OBJECTIVE
 print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
@@ -46,7 +43,7 @@ def ai_call(
 ):
     while True:
         try:
-            return instruct(prompt, model, temperature, max_tokens)
+            return instruct(prompt)
         except Exception as e:
             print(f"Error: {e}")
             time.sleep(10)  # Wait 10 seconds and try again
@@ -61,7 +58,7 @@ def get_prompt(prompt_name: str):
 def task_creation_agent(objective: str, result: Dict, task_description: str, task_list: List[str]):
     prompt = get_prompt("task")
     prompt = prompt.replace("{objective}", objective)
-    prompt = prompt.replace("{result}", result)
+    prompt = prompt.replace("{result}", str(result))
     prompt = prompt.replace("{task_description}", task_description)
     prompt = prompt.replace("{tasks}", ", ".join(task_list))
     response = ai_call(prompt)
@@ -95,7 +92,7 @@ def execution_agent(objective: str, task: str) -> str:
     prompt = get_prompt("execute")
     prompt = prompt.replace("{objective}", objective)
     prompt = prompt.replace("{task}", task)
-    prompt = prompt.replace("{context}", context)
+    prompt = prompt.replace("{context}", str(context))
     return ai_call(prompt, max_tokens=2000)
 
 def context_agent(query: str, top_results_num: int):

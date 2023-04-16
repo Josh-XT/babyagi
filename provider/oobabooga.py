@@ -1,19 +1,16 @@
 import requests
-
+from Config import Config
+CFG = Config()
 class AIProvider:
-    def __init__(self, temperature, max_tokens):
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-
     def instruct(self, prompt):
         response = requests.post("http://localhost:7860/run/textgen", json={
             "data": [
                 [
                     prompt,
                     {
-                        'max_new_tokens': self.max_tokens,
+                        'max_new_tokens': CFG.MAX_TOKENS,
                         'do_sample': True,
-                        'temperature': self.temperature,
+                        'temperature': CFG.AI_TEMPERATURE,
                         'top_p': 0.73,
                         'typical_p': 1,
                         'repetition_penalty': 1.1,

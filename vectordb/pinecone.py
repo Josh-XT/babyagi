@@ -17,12 +17,15 @@ class VectorDB:
             self.index = pinecone.Index(CFG.TABLE_NAME)
 
     def results(self, query, top_results_num):
-        results = self.index.query(query, top_k=top_results_num, include_metadata=True, namespace=CFG.OBJECTIVE)
+        query_list = query.tolist()
+        results = self.index.query(query_list, top_k=top_results_num, include_metadata=True, namespace=CFG.OBJECTIVE)
         sorted_results = sorted(results.matches, key=lambda x: x.score, reverse=True)
         return [(str(item.metadata["task"])) for item in sorted_results]
 
     def store_results(self, result_id, vector, result, task):
+        vector_list = vector.tolist()
         self.index.upsert(
-            [(result_id, vector, {"task": task["task_name"], "result": result})],
+            [(result_id, vector_list, {"task": task["task_name"], "result": result})],
             namespace=CFG.OBJECTIVE
         )
+
