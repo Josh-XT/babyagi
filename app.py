@@ -14,9 +14,14 @@ def run_tms():
 
 def print_output(message, event_name):
     tms.task_list.append(message)
-    socketio.emit(event_name, list(tms.task_list))
+    taskList = list(tms.task_list)
+    tasks_html = ""
+    for task in taskList:
+        tasks_html += f'<div class="box"><strong>{task["task_id"]}: </strong>{task["task_name"]}</div>'
+    socketio.emit(event_name, tasks_html)
 
     print('print_output called with event_name:', event_name, 'and message:', message)
+
 
 @app.route('/')
 def index():

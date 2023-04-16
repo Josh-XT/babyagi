@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
     <title>Task Management System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.min.js"></script>
 
     <style>
         #app {
@@ -34,11 +34,11 @@
         </header>
         <section class="section">
             <div class="container">
-                <form id="objective-form" method="post" action="/submit">
+                <form id="objective-form">
                     <div class="field">
                         <label class="label" for="objective">Objective</label>
                         <div class="control">
-                            <input class="input" type="text" id="objective" name="objective" placeholder="Enter your objective">
+                            <input class="input" type="text" id="objective" placeholder="Enter your objective">
                         </div>
                     </div>
                     <div class="control">
@@ -61,6 +61,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
     <script>
         const socket = io();
+
         function updateTaskList(taskList) {
             console.log('updateTaskList called with taskList:', taskList);
 
@@ -72,11 +73,8 @@
             }
         }
 
-
         function addTaskToHistory(task) {
             console.log('addTaskToHistory called with task:', task);
-
-            addTask(task);
 
             const taskHistory = document.getElementById('task-history');
             const taskItem = document.createElement('div');
@@ -84,7 +82,6 @@
             taskItem.innerHTML = `<strong>${task.task_id}:</strong> ${task.task_name}`;
             taskHistory.appendChild(taskItem);
         }
-
 
         function addTask(task) {
             const taskList = document.getElementById('task-list');
@@ -95,12 +92,7 @@
         }
 
         socket.on('task_list_update', (taskList) => {
-            const taskListElement = document.getElementById('task-list');
-            taskListElement.innerHTML = '<h2 class="title">Task List</h2>';
-
-            for (const task of taskList) {
-                addTask(task);
-            }
+            updateTaskList(taskList);
         });
 
         socket.on('next_task', (task) => {
@@ -114,7 +106,11 @@
             event.preventDefault();
             socket.emit('set_objective', objectiveInput.value);
         });
+        function addTask(taskHtml) {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML += taskHtml;
+        }
+
     </script>
 </body>
 </html>
-
