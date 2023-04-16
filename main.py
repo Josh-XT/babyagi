@@ -5,9 +5,6 @@ from collections import deque
 from typing import Dict, List
 import importlib
 from dotenv import load_dotenv
-from provider.openai import instruct
-from vectordb.pinecone import results, store_results
-from embedding.openai import get_embedding
 
 # Load default environment variables (.env)
 load_dotenv()
@@ -22,17 +19,24 @@ INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
 
 # Model configuration
 AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
+MAX_TOKENS = 100
 
 try:
     # Import the providers dynamically
-    ai_module = __import__(f"provider.{AI_PROVIDER}", fromlist=[""])
-    vectordb_module = __import__(f"vectordb.{VECTORDB_PROVIDER}", fromlist=[""])
-    embedding_module = __import__(f"embedding.{EMBEDDING}", fromlist=[""])
-    # Get the functions from the modules
-    instruct = ai_module.instruct
-    get_embedding = embedding_module.get_embedding
-    results = vectordb_module.results
-    store_results = vectordb_module.store_results
+    ai_module = importlib.import_module(f"provider.{AI_PROVIDER}")
+    vectordb_module = importlib.import_module(f"vectordb.{VECTORDB_PROVIDER}")
+    embedding_module = importlib.import_module(f"embedding.{EMBEDDING}")
+
+    # Instantiate classes
+    ai_instance = ai_module.AIProvider(AI_MODEL, AI_TEMPERATURE, MAX_TOKENS)
+    embedding_instance = embedding_module.Embedding()
+    vectordb_instance = vectordb_module.VectorDB()
+
+    # Get the methods from the instances
+    instruct = ai_instance.instruct
+    get_embedding = embedding_instance.get_embedding
+    results = vectordb_instance.results
+    store_results = vectordb_instance.store_results
 except:
     print("Error: AI_PROVIDER or VECTORDB_PROVIDER unable to load. Check your .env file.")
     exit()
