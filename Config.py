@@ -12,12 +12,12 @@ class Config():
         self.INITIAL_TASK = os.getenv("INITIAL_TASK", "Develop a task list")
 
         # AI Configuration
-        self.AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
-        self.VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
-        self.EMBEDDING = os.getenv("EMBEDDING", "openai")
+        self.AI_PROVIDER = os.getenv("AI_PROVIDER", "openai").lower()
+        self.VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone").lower()
+        self.EMBEDDING = os.getenv("EMBEDDING", "openai").lower()
         
         # Model configuration
-        self.AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
+        self.AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo").lower()
         self.AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
         self.MAX_TOKENS = os.getenv("MAX_TOKENS", 2000)
         
