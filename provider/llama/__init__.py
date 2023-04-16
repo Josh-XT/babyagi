@@ -1,7 +1,4 @@
 import subprocess
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
 def instruct(model, prompt, temperature, max_tokens):
     cmd = [f"llama/main", "-p", prompt]
