@@ -1,11 +1,10 @@
 import openai
 import numpy as np
-
+from main import CFG
 class OpenAIEmbedding:
-    def __init__(self, api_key, chunk_size=4096):
+    def __init__(self, chunk_size=4096):
         self.chunk_size = chunk_size
-        self.api_key = api_key
-        openai.api_key = self.api_key
+        openai.api_key = CFG.OPENAI_API_KEY
 
     def get_embedding(self, text):
         text = text.replace("\n", " ")

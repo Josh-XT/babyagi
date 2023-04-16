@@ -15,8 +15,11 @@ class Config():
         self.AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
         self.VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
         self.EMBEDDING = os.getenv("EMBEDDING", "openai")
-        self.AI_MODEL = os.getenv("OPENAI_API_MODEL", "gpt-3.5-turbo")
+        
+        # Model configuration
+        self.AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
         self.AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
+        self.MAX_TOKENS = os.getenv("MAX_TOKENS", 2000)
         
         # Extensions Configuration
 

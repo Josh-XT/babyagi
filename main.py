@@ -1,34 +1,19 @@
 #!/usr/bin/env python3
-import os
 import time
 from collections import deque
 from typing import Dict, List
 import importlib
-from dotenv import load_dotenv
-
-# Load default environment variables (.env)
-load_dotenv()
-
-AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
-VECTORDB_PROVIDER = os.getenv("VECTORDB_PROVIDER", "pinecone")
-AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
-EMBEDDING = os.getenv("EMBEDDING", "openai")
-# Goal configuation
-OBJECTIVE = os.getenv("OBJECTIVE", "")
-INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
-
-# Model configuration
-AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
-MAX_TOKENS = 100
+from Config import Config
+CFG = Config()
 
 try:
     # Import the providers dynamically
-    ai_module = importlib.import_module(f"provider.{AI_PROVIDER}")
-    vectordb_module = importlib.import_module(f"vectordb.{VECTORDB_PROVIDER}")
-    embedding_module = importlib.import_module(f"embedding.{EMBEDDING}")
+    ai_module = importlib.import_module(f"provider.{CFG.AI_PROVIDER}")
+    vectordb_module = importlib.import_module(f"vectordb.{CFG.VECTORDB_PROVIDER}")
+    embedding_module = importlib.import_module(f"embedding.{CFG.EMBEDDING}")
 
     # Instantiate classes
-    ai_instance = ai_module.AIProvider(AI_MODEL, AI_TEMPERATURE, MAX_TOKENS)
+    ai_instance = ai_module.AIProvider(CFG.AI_MODEL, CFG.AI_TEMPERATURE, CFG.MAX_TOKENS)
     embedding_instance = embedding_module.Embedding()
     vectordb_instance = vectordb_module.VectorDB()
 
@@ -41,50 +26,11 @@ except:
     print("Error: AI_PROVIDER or VECTORDB_PROVIDER unable to load. Check your .env file.")
     exit()
 
-# Extensions support begin
-
-def can_import(module_name):
-    try:
-        importlib.import_module(module_name)
-        return True
-    except ImportError:
-        return False
-
-DOTENV_EXTENSIONS = os.getenv("DOTENV_EXTENSIONS", "").split(" ")
-
-# Command line arguments extension
-# Can override any of the above environment variables
-ENABLE_COMMAND_LINE_ARGS = (
-    os.getenv("ENABLE_COMMAND_LINE_ARGS", "false").lower() == "true"
-)
-if ENABLE_COMMAND_LINE_ARGS:
-    if can_import("extensions.argparseext"):
-        from extensions.argparseext import parse_arguments
-
-        OBJECTIVE, INITIAL_TASK, AI_MODEL, DOTENV_EXTENSIONS = parse_arguments()
-
-# Load additional environment variables for enabled extensions
-if DOTENV_EXTENSIONS:
-    if can_import("extensions.dotenvext"):
-        from extensions.dotenvext import load_dotenv_extensions
-
-        load_dotenv_extensions(DOTENV_EXTENSIONS)
-
-# TODO: There's still work to be done here to enable people to get
-# defaults from dotenv extensions # but also provide command line
-# arguments to override them
-
-# Extensions support end
-
-# Check if we know what we are doing
-assert OBJECTIVE, "OBJECTIVE environment variable is missing from .env"
-assert INITIAL_TASK, "INITIAL_TASK environment variable is missing from .env"
-
 # Print OBJECTIVE
 print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
-print(f"{OBJECTIVE}")
+print(f"{CFG.OBJECTIVE}")
 
-print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {INITIAL_TASK}")
+print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {CFG.INITIAL_TASK}")
 
 # Task list
 task_list = deque([])
@@ -94,8 +40,8 @@ def add_task(task: Dict):
 
 def ai_call(
     prompt: str,
-    model: str = AI_MODEL,
-    temperature: float = AI_TEMPERATURE,
+    model: str = CFG.AI_MODEL,
+    temperature: float = CFG.AI_TEMPERATURE,
     max_tokens: int = 100,
 ):
     while True:
@@ -108,7 +54,7 @@ def ai_call(
             break
 
 def get_prompt(prompt_name: str):
-    with open(f"provider/{AI_PROVIDER}/{AI_MODEL}/{prompt_name}.txt", "r") as f:
+    with open(f"provider/{CFG.AI_PROVIDER}/{CFG.AI_MODEL}/{prompt_name}.txt", "r") as f:
         prompt = f.read()
     return prompt
 
@@ -127,7 +73,7 @@ def prioritization_agent(this_task_id: int):
     task_names = [t["task_name"] for t in task_list]
     next_task_id = int(this_task_id) + 1
     prompt = get_prompt("priority")
-    prompt = prompt.replace("{objective}", OBJECTIVE)
+    prompt = prompt.replace("{objective}", CFG.OBJECTIVE)
     prompt = prompt.replace("{next_task_id}", str(next_task_id))
     prompt = prompt.replace("{task_names}", ", ".join(task_names))
     response = ai_call(prompt)
@@ -161,7 +107,7 @@ def context_agent(query: str, top_results_num: int):
     return results(query_embedding, top_results_num)
 
 # Add the first task
-first_task = {"task_id": 1, "task_name": INITIAL_TASK}
+first_task = {"task_id": 1, "task_name": CFG.INITIAL_TASK}
 
 add_task(first_task)
 # Main loop
@@ -183,7 +129,7 @@ while True:
         print(f"{this_task_id}: {this_task_name}")
 
         # Send to execution function to complete the task based on the context
-        result = execution_agent(OBJECTIVE, task["task_name"])
+        result = execution_agent(CFG.OBJECTIVE, task["task_name"])
         print("\033[93m\033[1m" + "\n*****TASK RESULT*****\n" + "\033[0m\033[0m")
         print(result)
 
@@ -198,7 +144,7 @@ while True:
 
         # Step 3: Create new tasks and reprioritize task list
         new_tasks = task_creation_agent(
-            OBJECTIVE,
+            CFG.OBJECTIVE,
             enriched_result,
             this_task_name,
             [t["task_name"] for t in task_list],

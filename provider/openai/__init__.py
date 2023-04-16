@@ -1,12 +1,11 @@
 import openai
-
+from main import CFG
 class OpenAIProvider:
-    def __init__(self, api_key, model, temperature, max_tokens):
-        self.api_key = api_key
+    def __init__(self, model, temperature, max_tokens):
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        openai.api_key = self.api_key
+        openai.api_key = CFG.OPENAI_API_KEY
         if "gpt-4" in self.model.lower():
             print(
                 "\033[91m\033[1m"
