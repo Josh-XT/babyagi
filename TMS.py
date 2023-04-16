@@ -2,6 +2,8 @@ import time
 from collections import deque
 from typing import Dict, List
 import importlib
+import chromadb
+from chromadb.utils import embedding_functions
 from Config import Config
 
 class TaskManagementSystem:
@@ -11,19 +13,26 @@ class TaskManagementSystem:
         self.initial_task = self.CFG.INITIAL_TASK if initial_task == None else initial_task
         # Import the providers dynamically
         ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
-        vectordb_module = importlib.import_module(f"vectordb.{self.CFG.VECTORDB_PROVIDER}")
-        embedding_module = importlib.import_module(f"embedding.{self.CFG.EMBEDDING}")
-
-        # Instantiate classes
+        if self.CFG.AI_PROVIDER == "openai":
+            self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
+        else:
+            self.embedding_function = embedding_functions.InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl")
+        # Create Chroma collection
+        self.chroma_persist_dir = "memories"
+        self.chroma_client = chromadb.Client(
+            settings=chromadb.config.Settings(
+                chroma_db_impl="duckdb+parquet",
+                persist_directory=self.chroma_persist_dir,
+            )
+        )
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="table_name",
+            metadata={"hnsw:space": "cosine"},
+            embedding_function=self.embedding_function,
+        )
+        # Instantiate AI Provider and get instruct method
         self.ai_instance = ai_module.AIProvider()
-        self.embedding_instance = embedding_module.Embedding()
-        self.vectordb_instance = vectordb_module.VectorDB()
-
-        # Get the methods from the instances
         self.instruct = self.ai_instance.instruct
-        self.get_embedding = self.embedding_instance.get_embedding
-        self.results = self.vectordb_instance.results
-        self.store_results = self.vectordb_instance.store_results
 
         # Print OBJECTIVE
         print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
@@ -102,8 +111,13 @@ class TaskManagementSystem:
         #   query: The query or objective for retrieving context.
         #   top_results_num: The number of top results to retrieve.
         # Returns: A list of tasks as context for the given query, sorted by relevance.
-        query_embedding = self.get_embedding(query)
-        return self.results(query_embedding, top_results_num)
+        count = self.collection.count()
+        if count == 0:
+            return []
+        results = self.collection.query(
+            query_texts=query, n_results=min(top_results_num, count), include=["metadatas"]
+        )
+        return [item["task"] for item in results["metadatas"][0]]
 
     def run(self):
         # Add the first task
@@ -137,10 +151,23 @@ class TaskManagementSystem:
                 enriched_result = {
                     "data": result
                 } # This is where you should enrich the result if needed
-
                 result_id = f"result_{this_task_id}"
-                vector = self.get_embedding(enriched_result["data"])
-                self.store_results(result_id, vector, result, task)
+                vector = enriched_result[
+                    "data"
+                ]  # extract the actual result from the dictionary
+
+                if (len(self.collection.get(ids=[result_id], include=[])["ids"]) > 0):  # Check if the result already exists
+                    self.collection.update(
+                        ids=result_id,
+                        documents=vector,
+                        metadatas={"task": task["task_name"], "result": result},
+                    )
+                else:
+                    self.collection.add(
+                        ids=result_id,
+                        documents=vector,
+                        metadatas={"task": task["task_name"], "result": result},
+                    )
 
                 # Step 3: Create new tasks and reprioritize task list
                 new_tasks = self.task_creation_agent(

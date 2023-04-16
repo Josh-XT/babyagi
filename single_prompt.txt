@@ -64,3 +64,5 @@ def run_baby_agi_one_step(objective: str, priors: str):
     """
 
     <your hallucinated implementation>
+
+simulate run_baby_agi_one_step("{objective}")

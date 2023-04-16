@@ -10,3 +10,4 @@ faiss-cpu
 tiktoken
 flask
 flask-socketio
+pytz
