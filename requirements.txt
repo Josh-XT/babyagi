@@ -11,3 +11,5 @@ tiktoken
 flask
 flask-socketio
 pytz
+InstructorEmbedding
+chromadb
