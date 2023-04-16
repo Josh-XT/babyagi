@@ -26,7 +26,7 @@ class TaskManagementSystem:
             )
         )
         self.collection = self.chroma_client.get_or_create_collection(
-            name=self.CFG.AGENT_NAME,
+            name=str(self.CFG.AGENT_NAME).lower(),
             metadata={"hnsw:space": "cosine"},
             embedding_function=self.embedding_function,
         )
