@@ -8,3 +8,5 @@ git+https://github.com/huggingface/transformers
 sentence-transformers
 faiss-cpu
 tiktoken
+flask
+flask-socketio

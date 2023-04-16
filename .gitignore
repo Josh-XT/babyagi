@@ -13,3 +13,4 @@ env/
 
 models
 llama.cpp
+node_modules

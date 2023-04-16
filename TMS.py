@@ -33,6 +33,11 @@ class TaskManagementSystem:
 
         # Task list
         self.task_list = deque([])
+        self.output_list = []
+    
+    def print_output(self, message, event_name):
+        print(message)
+        self.output_list.append(message)
 
     def add_task(self, task: Dict):
         self.task_list.append(task)
@@ -40,12 +45,13 @@ class TaskManagementSystem:
     def ai_call(self, prompt: str):
         while True:
             try:
-                return self.instruct(prompt)
+                response = self.instruct(prompt)
+                self.print_output(response, 'ai_response')
+                return response
             except Exception as e:
-                print(f"Error: {e}")
+                error_message = f"Error: {e}"
+                self.print_output(error_message, 'ai_response')
                 time.sleep(10)  # Wait 10 seconds and try again
-            else:
-                break
 
     def get_prompt(self, prompt_name: str):
         with open(f"model-prompts/{self.CFG.AI_MODEL}/{prompt_name}.txt", "r") as f:
