@@ -1,4 +1,5 @@
 import time
+import re
 from collections import deque
 from typing import Dict, List
 from Config import Config
@@ -34,10 +35,8 @@ class babyagi:
         prompt = prompt.replace("{task_description}", task_description)
         prompt = prompt.replace("{tasks}", ", ".join(task_list))
         response = self.prompter.run(prompt)
-        
         if response is None:
             return []  # Return an empty list when the response is None
-
         new_tasks = response.split("\n") if "\n" in response else [response]
         return [{"task_name": task_name} for task_name in new_tasks]
 
@@ -57,6 +56,9 @@ class babyagi:
             task_id = task_parts[0].strip()
             task_name = task_parts[1].strip()
             self.task_list.append({"task_id": task_id, "task_name": task_name})
+        print("\033[95m\033[1m" + "\n*****TASK LIST*****\n" + "\033[0m\033[0m")
+        for task in self.task_list:
+            print(f"{task['task_id']}. {task['task_name']}")
 
     def execution_agent(self, objective: str, task: str) -> str:
         # Executes a task based on the given objective and previous context.
@@ -66,31 +68,32 @@ class babyagi:
         prompt = prompt.replace("{objective}", objective)
         prompt = prompt.replace("{task}", task)
         prompt = prompt.replace("{context}", str(context))
-        return self.prompter.run(prompt)
-
-    def add_initial_task(self):
-        first_task = {"task_id": 1, "task_name": self.initial_task}
-        self.task_list.append(first_task)
+        self.response = self.prompter.run(prompt)
+        return self.response
 
     def execute_next_task(self):
         if self.task_list:
             task = self.task_list.popleft()
-            this_task_id = int(task["task_id"])
-            this_task_name = task["task_name"]
-            result = self.execution_agent(self.primary_objective, task["task_name"])
-            new_tasks = self.task_creation_agent(
-                self.primary_objective,
-                { "data": result },
-                this_task_name,
-                [t["task_name"] for t in self.task_list],
-            )
-            task_id_counter = this_task_id
-            for new_task in new_tasks:
-                task_id_counter += 1
-                new_task.update({"task_id": task_id_counter})
-                self.task_list.append(new_task)
-            self.prioritization_agent(this_task_id)
-        return task, result
+        else:
+            task = {"task_id": 0, "task_name": self.initial_task}
+        this_task_id = task["task_id"]
+        if type(this_task_id) != int:
+            this_task_id = ''.join(re.findall(r'\d+', this_task_id))
+        this_task_name = task["task_name"]
+        self.response = self.execution_agent(self.primary_objective, task["task_name"])
+        new_tasks = self.task_creation_agent(
+            self.primary_objective,
+            { "data": self.response },
+            this_task_name,
+            [t["task_name"] for t in self.task_list],
+        )
+        task_id_counter = int(this_task_id)
+        for new_task in new_tasks:
+            task_id_counter += 1
+            new_task.update({"task_id": task_id_counter})
+            self.task_list.append(new_task)
+        self.prioritization_agent(this_task_id)
+        return task
 
     def run(self):
         # Add the first task
@@ -98,8 +101,8 @@ class babyagi:
 
         # Main loop
         while True:
-            task, result = self.execute_next_task()
-            if task and result:
+            task = self.execute_next_task()
+            if task:
                 print("\033[95m\033[1m" + "\n*****TASK LIST*****\n" + "\033[0m\033[0m")
                 for t in self.task_list:
                     task_id = t["task_id"]
@@ -108,7 +111,7 @@ class babyagi:
                 print("\033[92m\033[1m" + "\n*****NEXT TASK*****\n" + "\033[0m\033[0m")
                 print(f"{task['task_id']}: {task['task_name']}")
                 print("\033[93m\033[1m" + "\n*****RESULT*****\n" + "\033[0m\033[0m")
-                print(result)
+                print(self.response)
             else:
                 print("\033[91m\033[1m" + "\n*****ALL TASKS COMPLETE*****\n" + "\033[0m\033[0m")
                 break

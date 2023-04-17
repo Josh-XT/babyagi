@@ -6,7 +6,6 @@ app = Flask(__name__)
 CORS(app)  # Add this line to enable CORS for your Flask application
 babyagi_instance = babyagi()
 
-
 @app.route('/api/set_objective', methods=['POST'])
 def set_objective():
     objective = request.json.get("objective")
@@ -20,9 +19,10 @@ def add_initial_task():
 
 @app.route('/api/execute_next_task', methods=['GET'])
 def execute_next_task():
-    task, result = babyagi_instance.execute_next_task()
-    if task and result:
-        return jsonify({"task": task, "result": result}), 200
+    task = babyagi_instance.execute_next_task()
+    task_list = list(babyagi_instance.task_list)  # Convert deque to a list
+    if task:
+        return jsonify({"task": task, "result": babyagi_instance.result, "task_list": task_list}), 200
     else:
         return jsonify({"message": "All tasks complete"}), 200
 
