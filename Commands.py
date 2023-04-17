@@ -6,7 +6,7 @@ from Config import Config
 class Commands:
     def __init__(self):
         self.CFG = Config()
-        self.commands = self.load_commands()
+        self.commands = {}
 
     def load_commands(self):
         commands = []
@@ -32,7 +32,7 @@ class Commands:
         return params
 
     def get_prompt(self):
-        commands_str = ""
+        self.commands = self.load_commands()
         for i, (command_name, command_function_name, params) in enumerate(self.commands, 1):
             formatted_params = {f"{k}": repr(v) for k, v in params.items()}
             commands_str += f'{i}. "{command_name}" - {command_function_name} {formatted_params}\n'
