@@ -24,6 +24,9 @@ class babyagi:
         print(f"{primary_objective}")
         print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {initial_task}")
 
+    def set_objective(self, new_objective):
+        self.primary_objective = new_objective
+
     def task_creation_agent(self, objective: str, result: Dict, task_description: str, task_list: List[str]):
         prompt = self.task_prompt
         prompt = prompt.replace("{objective}", objective)
@@ -31,6 +34,10 @@ class babyagi:
         prompt = prompt.replace("{task_description}", task_description)
         prompt = prompt.replace("{tasks}", ", ".join(task_list))
         response = self.prompter.run(prompt)
+        
+        if response is None:
+            return []  # Return an empty list when the response is None
+
         new_tasks = response.split("\n") if "\n" in response else [response]
         return [{"task_name": task_name} for task_name in new_tasks]
 

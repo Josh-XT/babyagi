@@ -1,8 +1,17 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from babyagi import babyagi
 
 app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS for your Flask application
 babyagi_instance = babyagi()
+
+
+@app.route('/api/set_objective', methods=['POST'])
+def set_objective():
+    objective = request.json.get("objective")
+    babyagi_instance.set_objective(objective)
+    return jsonify({"message": "Objective updated"}), 200
 
 @app.route('/api/add_initial_task', methods=['POST'])
 def add_initial_task():

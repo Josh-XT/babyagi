@@ -42,6 +42,7 @@ class AgentLLM:
         prompt = self.get_prompt_with_context(task=task, context=context)
         self.response = self.instruct(prompt)
         self.store_result(task, self.response)
+        return self.response
 
     def store_result(self, task_name: str, result: str):
         result_id = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(64))
