@@ -37,4 +37,6 @@ class AIProvider:
         # Replace all backslashes in data then return it
         data = data.replace("\\n", "\n")
         data = data.replace("\\'", "'")
+        data = data.replace("\\", "")
+        data = data.replace("\'", "'")
         return data
