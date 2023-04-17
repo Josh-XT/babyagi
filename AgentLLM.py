@@ -33,12 +33,6 @@ class AgentLLM:
         ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
         self.ai_instance = ai_module.AIProvider()
         self.instruct = self.ai_instance.instruct
-    
-    def add_initial_task(self):
-        self.task_list.append({"task_id": 1, "task_name": self.initial_task})
-
-    def set_objective(self, new_objective):
-        self.primary_objective = new_objective
 
     def run(self, task: str, folder_path: str = None, url: str = None):
         responses = self.process_input(task, folder_path=folder_path, url=url)

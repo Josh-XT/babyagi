@@ -25,6 +25,9 @@ class babyagi:
         print(f"{primary_objective}")
         print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {initial_task}")
 
+    def add_initial_task(self):
+        self.task_list.append({"task_id": 1, "task_name": self.initial_task})
+
     def set_objective(self, new_objective):
         self.primary_objective = new_objective
 
