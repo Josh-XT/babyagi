@@ -40,6 +40,10 @@ class Config():
         self.TW_ACCESS_TOKEN = os.getenv("TW_ACCESS_TOKEN")
         self.TW_ACCESS_TOKEN_SECRET = os.getenv("TW_ACCESS_TOKEN_SECRET")
 
+        # Github
+        self.GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
+        self.GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
+
         # Voice (Choose one: ElevenLabs, Brian, Mac OS)
         # Elevenlabs
         self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
