@@ -11,8 +11,6 @@ class TaskManagementSystem:
         self.CFG = Config()
         self.primary_objective = self.CFG.OBJECTIVE if primary_objective == None else primary_objective
         self.initial_task = self.CFG.INITIAL_TASK if initial_task == None else initial_task
-        # Import the providers dynamically
-        ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
         if self.CFG.AI_PROVIDER == "openai":
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
         else:
@@ -31,6 +29,7 @@ class TaskManagementSystem:
             embedding_function=self.embedding_function,
         )
         # Instantiate AI Provider and get instruct method
+        ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
         self.ai_instance = ai_module.AIProvider()
         self.instruct = self.ai_instance.instruct
 
@@ -43,7 +42,21 @@ class TaskManagementSystem:
         # Task list
         self.task_list = deque([])
         self.output_list = []
-    
+
+    def store_result(self, task_name: str, result: str, result_id: str):
+        if (len(self.collection.get(ids=[result_id], include=[])["ids"]) > 0):
+            self.collection.update(
+                ids=result_id,
+                documents=result,
+                metadatas={"task": task_name, "result": result},
+            )
+        else:
+            self.collection.add(
+                ids=result_id,
+                documents=result,
+                metadatas={"task": task_name, "result": result},
+            )
+
     def print_output(self, message, event_name):
         print(message)
         self.output_list.append(message)
@@ -155,19 +168,8 @@ class TaskManagementSystem:
                 vector = enriched_result[
                     "data"
                 ]  # extract the actual result from the dictionary
-
-                if (len(self.collection.get(ids=[result_id], include=[])["ids"]) > 0):  # Check if the result already exists
-                    self.collection.update(
-                        ids=result_id,
-                        documents=vector,
-                        metadatas={"task": task["task_name"], "result": result},
-                    )
-                else:
-                    self.collection.add(
-                        ids=result_id,
-                        documents=vector,
-                        metadatas={"task": task["task_name"], "result": result},
-                    )
+                # Store the result in the vector database
+                self.store_result(task_name=this_task_name, result_id=result_id, vector=vector)
 
                 # Step 3: Create new tasks and reprioritize task list
                 new_tasks = self.task_creation_agent(
