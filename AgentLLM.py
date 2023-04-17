@@ -9,7 +9,7 @@ from typing import List
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-class SuperPrompter:
+class AgentLLM:
     def __init__(self):
         self.CFG = Config()
         if self.CFG.AI_PROVIDER == "openai":
@@ -123,5 +123,5 @@ if __name__ == "__main__":
     # URL to scrape
     url = "https://example.com"
 
-    sp = SuperPrompter(task, folder_path, url)
+    sp = AgentLLM(task, folder_path, url)
     print("Response: ", sp.response)

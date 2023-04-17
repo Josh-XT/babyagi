@@ -2,7 +2,7 @@ import time
 from collections import deque
 from typing import Dict, List
 from Config import Config
-from SuperPrompter import SuperPrompter
+from AgentLLM import AgentLLM
 class babyagi:
     def __init__(self, primary_objective=None, initial_task=None):
         self.CFG = Config()
@@ -17,7 +17,7 @@ class babyagi:
         # Task list
         self.task_list = deque([])
         self.output_list = []
-        self.prompter = SuperPrompter()
+        self.prompter = AgentLLM()
 
         # Print OBJECTIVE
         print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
