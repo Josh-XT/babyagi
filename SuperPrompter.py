@@ -10,7 +10,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 class SuperPrompter:
-    def __init__(self, task: str = None, folder_path: str = None, url: str = None):
+    def __init__(self):
         self.CFG = Config()
         if self.CFG.AI_PROVIDER == "openai":
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
@@ -23,6 +23,8 @@ class SuperPrompter:
                 persist_directory=self.chroma_persist_dir,
             )
         )
+        # The collection of thoughts is associated with the AGENT_NAME
+        # May change to a unique session variable later.
         self.collection = self.chroma_client.get_or_create_collection(
             name=str(self.CFG.AGENT_NAME).lower(),
             metadata={"hnsw:space": "cosine"},
@@ -31,42 +33,28 @@ class SuperPrompter:
         ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
         self.ai_instance = ai_module.AIProvider()
         self.instruct = self.ai_instance.instruct
-        if task != None:
-            responses = []
-            if folder_path: # Process a folder of files
-                responses = self.process_input(task, folder_path=folder_path)
-            if url: # Process a URL
-                url_responses = self.process_input(task, url=url)
-                responses.extend(url_responses)
-            for response in responses:
-                self.store_result(task, response)
-            context = self.context_agent(query=task, top_results_num=5)
-            prompt = self.get_prompt_with_context(task=task, context=context)
-            self.response = self.instruct(prompt)
-            self.store_result(task, self.response)
+    
+    def run(self, task: str, folder_path: str = None, url: str = None):
+        responses = self.process_input(task, folder_path=folder_path, url=url)
+        for response in responses:
+            self.store_result(task, response)
+        context = self.context_agent(query=task, top_results_num=5)
+        prompt = self.get_prompt_with_context(task=task, context=context)
+        self.response = self.instruct(prompt)
+        self.store_result(task, self.response)
 
     def store_result(self, task_name: str, result: str):
         result_id = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(64))
         if (len(self.collection.get(ids=[result_id], include=[])["ids"]) > 0):
-            self.collection.update(
-                ids=result_id,
-                documents=result,
-                metadatas={"task": task_name, "result": result},
-            )
+            self.collection.update(ids=result_id, documents=result, metadatas={"task": task_name, "result": result})
         else:
-            self.collection.add(
-                ids=result_id,
-                documents=result,
-                metadatas={"task": task_name, "result": result},
-            )
+            self.collection.add(ids=result_id, documents=result, metadatas={"task": task_name, "result": result})
 
     def context_agent(self, query: str, top_results_num: int) -> List[str]:
         count = self.collection.count()
         if count == 0:
             return []
-        results = self.collection.query(
-            query_texts=query, n_results=min(top_results_num, count), include=["metadatas"]
-        )
+        results = self.collection.query(query_texts=query, n_results=min(top_results_num, count), include=["metadatas"])
         return [item["result"] for item in results["metadatas"][0]]
 
     def get_prompt_with_context(self, task: str, context: List[str]) -> str:
@@ -90,6 +78,7 @@ class SuperPrompter:
             responses.append(response)
         return responses
     
+    # Data reading extensions
     def scrape_website(self, url: str) -> str:
         driver = webdriver.Chrome(ChromeDriverManager().install())
         driver.get(url)
@@ -97,17 +86,13 @@ class SuperPrompter:
         driver.quit()
         return content
     
-    def read_file(self, file_path: str) -> str:
-        with open(file_path, "r") as file:
-            content = file.read()
-        return content
-    
     def process_folder(self, folder_path: str, task: str) -> List[str]:
         all_responses = []
         for file_name in os.listdir(folder_path):
             file_path = os.path.join(folder_path, file_name)
             if os.path.isfile(file_path):
-                content = self.read_file(file_path)
+                with open(file_path, "r") as file:
+                    content = file.read()
                 chunks = self.chunk_content(content)
                 responses = self.process_chunks(task, chunks)
                 all_responses.extend(responses)
@@ -119,7 +104,8 @@ class SuperPrompter:
             for file_name in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file_name)
                 if os.path.isfile(file_path):
-                    content = self.read_file(file_path)
+                    with open(file_path, "r") as file:
+                        content = file.read()
                     chunks = self.chunk_content(content)
                     responses = self.process_chunks(task, chunks)
                     all_responses.extend(responses)
