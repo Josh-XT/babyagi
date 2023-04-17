@@ -39,3 +39,13 @@ class Config():
         self.TW_CONSUMER_SECRET = os.getenv("TW_CONSUMER_SECRET")
         self.TW_ACCESS_TOKEN = os.getenv("TW_ACCESS_TOKEN")
         self.TW_ACCESS_TOKEN_SECRET = os.getenv("TW_ACCESS_TOKEN_SECRET")
+
+        # Voice (Choose one: ElevenLabs, Brian, Mac OS)
+        # Elevenlabs
+        self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+        self.ELEVENLABS_VOICE = os.getenv("ELEVENLABS_VOICE", "Josh")
+        # Mac OS TTS
+        self.USE_MAC_OS_TTS = os.getenv("USE_MAC_OS_TTS", "false").lower() == "false"
+
+        # Brian TTS
+        self.USE_BRIAN_TTS = os.getenv("USE_BRIAN_TTS", "true").lower() == "true"
