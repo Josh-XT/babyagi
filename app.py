@@ -22,7 +22,7 @@ def execute_next_task():
     task = babyagi_instance.execute_next_task()
     task_list = list(babyagi_instance.task_list)  # Convert deque to a list
     if task:
-        return jsonify({"task": task, "result": babyagi_instance.result, "task_list": task_list}), 200
+        return jsonify({"task": task, "result": babyagi_instance.response, "task_list": task_list}), 200
     else:
         return jsonify({"message": "All tasks complete"}), 200
 
