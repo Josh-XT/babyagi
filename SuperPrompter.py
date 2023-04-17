@@ -74,18 +74,6 @@ class SuperPrompter:
         prompt = f"Context: {context_str}\n\nTask: {task}\n\nResponse:"
         return prompt
 
-    def read_file(self, file_path: str) -> str:
-        with open(file_path, "r") as file:
-            content = file.read()
-        return content
-    
-    def scrape_website(self, url: str) -> str:
-        driver = webdriver.Chrome(ChromeDriverManager().install())
-        driver.get(url)
-        content = driver.page_source
-        driver.quit()
-        return content
-    
     def chunk_content(self, content: str, max_length: int = 500) -> List[str]:
         content_chunks = []
         content_length = len(content)
@@ -101,7 +89,19 @@ class SuperPrompter:
             response = self.instruct(prompt)
             responses.append(response)
         return responses
-
+    
+    def scrape_website(self, url: str) -> str:
+        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver.get(url)
+        content = driver.page_source
+        driver.quit()
+        return content
+    
+    def read_file(self, file_path: str) -> str:
+        with open(file_path, "r") as file:
+            content = file.read()
+        return content
+    
     def process_folder(self, folder_path: str, task: str) -> List[str]:
         all_responses = []
         for file_name in os.listdir(folder_path):
@@ -132,7 +132,9 @@ class SuperPrompter:
     
 if __name__ == "__main__":
     task = "Perform the task with the given context."
+    # Folder path to read files from
     folder_path = "/path/to/your/folder"
+    # URL to scrape
     url = "https://example.com"
 
     sp = SuperPrompter(task, folder_path, url)
