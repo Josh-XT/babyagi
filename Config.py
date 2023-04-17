@@ -13,6 +13,7 @@ class Config():
         
         # AI Configuration
         self.AI_PROVIDER = os.getenv("AI_PROVIDER", "openai").lower()
+        self.COMMANDS_ENABLED = os.getenv("COMMANDS_ENABLED", "true").lower() == "true"
 
         # Model configuration
         self.AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo").lower()

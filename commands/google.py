@@ -1,6 +1,6 @@
 import json
 from duckduckgo_search import ddg
-from autogpt.config import Config
+from Config import Config
 from Commands import Commands
 
 CFG = Config()
