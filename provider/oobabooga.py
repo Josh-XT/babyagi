@@ -35,5 +35,9 @@ class AIProvider:
             ]
         }).json()
         data = response['data'][0]
-        data = data.replace("\'", "'")
-        return data.replace("\n", "\n")
+        # Replace all backslashes in data then return it
+        data = data.replace("\\", "")
+        # Split to show only the response
+        if "Response: " in data:
+            data = data.split("Response: ")[1]
+        return data
