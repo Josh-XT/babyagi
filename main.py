@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-from AgentTask import AgentTask
+from babyagi import babyagi
 
 def main(primary_objective):
-    tms = AgentTask(primary_objective=primary_objective)
+    tms = babyagi(primary_objective=primary_objective, initial_task="Develop a task list")
     tms.run()
 
 if __name__ == "__main__":
