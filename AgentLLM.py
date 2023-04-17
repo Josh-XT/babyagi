@@ -51,17 +51,44 @@ class AgentLLM:
         return trimmed_context
 
     def run(self, task: str, folder_path: str = None, url: str = None, commands_enabled: bool = True, max_context_tokens: int = 1000):
-        responses = self.process_input(task, folder_path=folder_path, url=url)
-        for response in responses:
-            self.store_result(task, response)
-        context = self.context_agent(query=task, top_results_num=5)
-        context = self.trim_context(context, max_context_tokens)
-        prompt = self.get_prompt_with_context(task=task, context=context)
-        if commands_enabled:
-            available_commands = self.Commands.get_prompt()
-            prompt = f"{available_commands}\n{prompt}"
-        self.response = self.instruct(prompt)
-        self.store_result(task, self.response)
+        if url:
+            content = self.scrape_website(url)
+            text_length = len(content)
+            print(f"Text length: {text_length} characters")
+            chunks = self.chunk_content(content)
+            summaries = []
+
+            for i, chunk in enumerate(chunks):
+                print(f"Adding chunk {i + 1} / {len(chunks)} to memory")
+                memory_to_add = f"Source: {url}\n" f"Raw content part#{i + 1}: {chunk}"
+                self.store_result(task, memory_to_add)
+
+                print(f"Summarizing chunk {i + 1} / {len(chunks)}")
+                context = self.context_agent(query=task, top_results_num=5)
+                context = self.trim_context(context, max_context_tokens)
+                prompt = self.get_prompt_with_context(task=task, context=context)
+                response = self.instruct(prompt)
+                summaries.append(response)
+                print(f"Added chunk {i + 1} summary to memory")
+
+                memory_to_add = f"Source: {url}\n" f"Content summary part#{i + 1}: {response}"
+                self.store_result(task, memory_to_add)
+
+            print(f"Summarized {len(chunks)} chunks.")
+            self.response = "\n".join(summaries)
+        else:
+            responses = self.process_input(task, folder_path=folder_path)
+            for response in responses:
+                self.store_result(task, response)
+            context = self.context_agent(query=task, top_results_num=5)
+            context = self.trim_context(context, max_context_tokens)
+            prompt = self.get_prompt_with_context(task=task, context=context)
+            if commands_enabled:
+                available_commands = self.Commands.get_prompt()
+                prompt = f"{available_commands}\n{prompt}"
+            self.response = self.instruct(prompt)
+            self.store_result(task, self.response)
+
         print(f"Response: {self.response}")
         return self.response
 

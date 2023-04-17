@@ -13,3 +13,5 @@ flask-socketio
 pytz
 InstructorEmbedding
 chromadb
+tweepy
+playwright

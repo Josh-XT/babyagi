@@ -30,3 +30,12 @@ class Config():
         # Huggingface
         self.HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
         self.HUGGINGFACE_AUDIO_TO_TEXT_MODEL = os.getenv("HUGGINGFACE_AUDIO_TO_TEXT_MODEL", "facebook/wav2vec2-large-960h-lv60-self")
+        
+        # Selenium
+        self.SELENIUM_WEB_BROWSER = os.getenv("SELENIUM_WEB_BROWSER", "chrome").lower()
+
+        # Twitter
+        self.TW_CONSUMER_KEY = os.getenv("TW_CONSUMER_KEY")
+        self.TW_CONSUMER_SECRET = os.getenv("TW_CONSUMER_SECRET")
+        self.TW_ACCESS_TOKEN = os.getenv("TW_ACCESS_TOKEN")
+        self.TW_ACCESS_TOKEN_SECRET = os.getenv("TW_ACCESS_TOKEN_SECRET")
