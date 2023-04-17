@@ -10,8 +10,8 @@ class github(Commands):
         super().__init__()
         if CFG.GITHUB_USERNAME is None and CFG.GITHUB_API_KEY is None:
             self.commands = {
-                "Clone Repository": self.clone_repo,
-                "Create Repository": self.create_repo
+                "Clone Github Repository": self.clone_repo,
+                "Create Github Repository": self.create_repo
             }
 
     def clone_repo(self, repo_url: str, clone_path: str) -> str:
