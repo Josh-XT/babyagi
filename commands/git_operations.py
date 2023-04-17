@@ -9,10 +9,11 @@ CFG = Config()
 class clone_repository(Commands):
     def __init__(self):
         super().__init__()
-        self.commands = {
-            "Clone Repository": self.clone_repo,
-            "Create Repository": self.create_repo
-        }
+        if CFG.GITHUB_USERNAME is None and CFG.GITHUB_API_KEY is None:
+            self.commands = {
+                "Clone Repository": self.clone_repo,
+                "Create Repository": self.create_repo
+            }
 
     def clone_repo(self, repo_url: str, clone_path: str) -> str:
         split_url = repo_url.split("//")
