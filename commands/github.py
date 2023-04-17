@@ -1,12 +1,11 @@
 import git
-import os
 from github import Github
 from Commands import Commands
 from Config import Config
 
 CFG = Config()
 
-class clone_repository(Commands):
+class github(Commands):
     def __init__(self):
         super().__init__()
         if CFG.GITHUB_USERNAME is None and CFG.GITHUB_API_KEY is None:
