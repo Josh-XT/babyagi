@@ -15,7 +15,8 @@ class AgentLLM:
         if self.CFG.AI_PROVIDER == "openai":
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
         else:
-            self.embedding_function = embedding_functions.InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl")
+            #self.embedding_function = embedding_functions.InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl")
+            self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
         self.chroma_persist_dir = "memories"
         self.chroma_client = chromadb.Client(
             settings=chromadb.config.Settings(
@@ -117,13 +118,3 @@ class AgentLLM:
             responses = self.process_chunks(task, chunks)
             all_responses.extend(responses)
         return all_responses
-    
-if __name__ == "__main__":
-    task = "Perform the task with the given context."
-    # Folder path to read files from
-    folder_path = "/path/to/your/folder"
-    # URL to scrape
-    url = "https://example.com"
-
-    sp = AgentLLM(task, folder_path, url)
-    print("Response: ", sp.response)
