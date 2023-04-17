@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-from TMS import TaskManagementSystem
+from AgentTask import AgentTask
 
 def main(primary_objective):
-    tms = TaskManagementSystem(primary_objective=primary_objective)
+    tms = AgentTask(primary_objective=primary_objective)
     tms.run()
 
 if __name__ == "__main__":

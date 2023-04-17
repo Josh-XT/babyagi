@@ -10,7 +10,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 class SuperPrompter:
-    def __init__(self, task: str, folder_path: str = None, url: str = None):
+    def __init__(self, task: str = None, folder_path: str = None, url: str = None):
         self.CFG = Config()
         if self.CFG.AI_PROVIDER == "openai":
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
@@ -31,25 +31,19 @@ class SuperPrompter:
         ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
         self.ai_instance = ai_module.AIProvider()
         self.instruct = self.ai_instance.instruct
-
-        responses = []
-
-        # Process a folder of files
-        if folder_path:
-            responses = self.process_input(task, folder_path=folder_path)
-        
-        # Process a URL
-        if url:
-            url_responses = self.process_input(task, url=url)
-            responses.extend(url_responses)
-            
-        for response in responses:
-            self.store_result(task, response)
-
-        context = self.context_agent(query=task, top_results_num=5)
-        prompt = self.get_prompt_with_context(task=task, context=context)
-        self.response = self.instruct(prompt)
-        self.store_result(task, self.response)
+        if task != None:
+            responses = []
+            if folder_path: # Process a folder of files
+                responses = self.process_input(task, folder_path=folder_path)
+            if url: # Process a URL
+                url_responses = self.process_input(task, url=url)
+                responses.extend(url_responses)
+            for response in responses:
+                self.store_result(task, response)
+            context = self.context_agent(query=task, top_results_num=5)
+            prompt = self.get_prompt_with_context(task=task, context=context)
+            self.response = self.instruct(prompt)
+            self.store_result(task, self.response)
 
     def store_result(self, task_name: str, result: str):
         result_id = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(64))
@@ -142,4 +136,4 @@ if __name__ == "__main__":
     url = "https://example.com"
 
     sp = SuperPrompter(task, folder_path, url)
-    print("Response:", sp.response)
+    print("Response: ", sp.response)

@@ -1,103 +1,46 @@
 import time
 from collections import deque
 from typing import Dict, List
-import importlib
-import chromadb
-from chromadb.utils import embedding_functions
 from Config import Config
-
-class TaskManagementSystem:
+from SuperPrompter import SuperPrompter
+class AgentTask:
     def __init__(self, primary_objective=None, initial_task=None):
         self.CFG = Config()
         self.primary_objective = self.CFG.OBJECTIVE if primary_objective == None else primary_objective
         self.initial_task = self.CFG.INITIAL_TASK if initial_task == None else initial_task
-        if self.CFG.AI_PROVIDER == "openai":
-            self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
-        else:
-            self.embedding_function = embedding_functions.InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl")
-        # Create Chroma collection
-        self.chroma_persist_dir = "memories"
-        self.chroma_client = chromadb.Client(
-            settings=chromadb.config.Settings(
-                chroma_db_impl="duckdb+parquet",
-                persist_directory=self.chroma_persist_dir,
-            )
-        )
-        self.collection = self.chroma_client.get_or_create_collection(
-            name=str(self.CFG.AGENT_NAME).lower(),
-            metadata={"hnsw:space": "cosine"},
-            embedding_function=self.embedding_function,
-        )
-        # Instantiate AI Provider and get instruct method
-        ai_module = importlib.import_module(f"provider.{self.CFG.AI_PROVIDER}")
-        self.ai_instance = ai_module.AIProvider()
-        self.instruct = self.ai_instance.instruct
-
-        # Print OBJECTIVE
-        print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
-        print(f"{primary_objective}")
-
-        print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {initial_task}")
-
+        with open(f"model-prompts/{self.CFG.AI_MODEL}/execute.txt", "r") as f:
+            self.execute_prompt = f.read()
+        with open(f"model-prompts/{self.CFG.AI_MODEL}/task.txt", "r") as f:
+            self.task_prompt = f.read()
+        with open(f"model-prompts/{self.CFG.AI_MODEL}/priority.txt", "r") as f:
+            self.priority_prompt = f.read()
         # Task list
         self.task_list = deque([])
         self.output_list = []
 
-    def store_result(self, task_name: str, result: str, result_id: str):
-        if (len(self.collection.get(ids=[result_id], include=[])["ids"]) > 0):
-            self.collection.update(
-                ids=result_id,
-                documents=result,
-                metadatas={"task": task_name, "result": result},
-            )
-        else:
-            self.collection.add(
-                ids=result_id,
-                documents=result,
-                metadatas={"task": task_name, "result": result},
-            )
-
-    def print_output(self, message, event_name):
-        print(message)
-        self.output_list.append(message)
-
-    def add_task(self, task: Dict):
-        self.task_list.append(task)
-
-    def ai_call(self, prompt: str):
-        while True:
-            try:
-                response = self.instruct(prompt)
-                self.print_output(response, 'ai_response')
-                return response
-            except Exception as e:
-                error_message = f"Error: {e}"
-                self.print_output(error_message, 'ai_response')
-                time.sleep(10)  # Wait 10 seconds and try again
-
-    def get_prompt(self, prompt_name: str):
-        with open(f"model-prompts/{self.CFG.AI_MODEL}/{prompt_name}.txt", "r") as f:
-            prompt = f.read()
-        return prompt
+        # Print OBJECTIVE
+        print("\033[94m\033[1m" + "\n*****OBJECTIVE*****\n" + "\033[0m\033[0m")
+        print(f"{primary_objective}")
+        print("\033[93m\033[1m" + "\nInitial task:" + "\033[0m\033[0m" + f" {initial_task}")
 
     def task_creation_agent(self, objective: str, result: Dict, task_description: str, task_list: List[str]):
-        prompt = self.get_prompt("task")
+        prompt = self.task_prompt
         prompt = prompt.replace("{objective}", objective)
         prompt = prompt.replace("{result}", str(result))
         prompt = prompt.replace("{task_description}", task_description)
         prompt = prompt.replace("{tasks}", ", ".join(task_list))
-        response = self.ai_call(prompt)
+        response = SuperPrompter(prompt).response
         new_tasks = response.split("\n") if "\n" in response else [response]
         return [{"task_name": task_name} for task_name in new_tasks]
 
     def prioritization_agent(self, this_task_id: int):
         task_names = [t["task_name"] for t in self.task_list]
         next_task_id = int(this_task_id) + 1
-        prompt = self.get_prompt("priority")
+        prompt = self.priority_prompt
         prompt = prompt.replace("{objective}", self.primary_objective)
         prompt = prompt.replace("{next_task_id}", str(next_task_id))
         prompt = prompt.replace("{task_names}", ", ".join(task_names))
-        response = self.ai_call(prompt)
+        response = SuperPrompter(prompt).response
         new_tasks = response.split("\n") if "\n" in response else [response]
         self.task_list = deque()
         for task_string in new_tasks:
@@ -112,30 +55,17 @@ class TaskManagementSystem:
         #   objective: The objective or goal for the AI to perform the task.
         #   task: The task to be executed by the AI.
         # Returns: The response generated by the AI for the given task.
-        context = self.context_agent(query=objective, top_results_num=5)
-        prompt = self.get_prompt("execute")
+        context = SuperPrompter().context_agent(query=objective, top_results_num=5)
+        prompt = self.execute_prompt
         prompt = prompt.replace("{objective}", objective)
         prompt = prompt.replace("{task}", task)
         prompt = prompt.replace("{context}", str(context))
-        return self.ai_call(prompt)
-
-    def context_agent(self, query: str, top_results_num: int):
-        # Retrieves context for a given query from an index of tasks.
-        #   query: The query or objective for retrieving context.
-        #   top_results_num: The number of top results to retrieve.
-        # Returns: A list of tasks as context for the given query, sorted by relevance.
-        count = self.collection.count()
-        if count == 0:
-            return []
-        results = self.collection.query(
-            query_texts=query, n_results=min(top_results_num, count), include=["metadatas"]
-        )
-        return [item["task"] for item in results["metadatas"][0]]
+        return SuperPrompter(prompt).response
 
     def run(self):
         # Add the first task
         first_task = {"task_id": 1, "task_name": self.initial_task}
-        self.add_task(first_task)
+        self.task_list.append(first_task)
 
         # Main loop
         task_id_counter = 1
@@ -182,7 +112,7 @@ class TaskManagementSystem:
                 for new_task in new_tasks:
                     task_id_counter += 1
                     new_task.update({"task_id": task_id_counter})
-                    self.add_task(new_task)
+                    self.task_list.append(new_task)
                 self.prioritization_agent(this_task_id)
 
             time.sleep(1)  # Sleep before checking the task list again
