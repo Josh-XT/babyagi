@@ -58,7 +58,7 @@ class AgentLLM:
         context = self.trim_context(context, max_context_tokens)
         prompt = self.get_prompt_with_context(task=task, context=context)
         if commands_enabled:
-            available_commands = self.commands.get_prompt()
+            available_commands = self.Commands.get_prompt()
             prompt = f"{available_commands}\n{prompt}"
         self.response = self.instruct(prompt)
         self.store_result(task, self.response)
