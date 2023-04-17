@@ -8,10 +8,10 @@ CFG = Config()
 class create_new_command(Commands):
     def __init__(self):
         self.commands = {
-            "Create a new command": self.create_new_command
+            "Create a new command": self.create_command
         }
 
-    def create_new_command(self, function_description: str) -> List[str]:
+    def create_command(self, function_description: str) -> List[str]:
         args = [function_description]
         function_string = """
 from typing import List
