@@ -1,4 +1,5 @@
 import os
+import re
 import chromadb
 import importlib
 import secrets
@@ -12,6 +13,7 @@ from Commands import Commands
 class AgentLLM:
     def __init__(self):
         self.CFG = Config()
+        self.Commands = Commands()
         if self.CFG.AI_PROVIDER == "openai":
             self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key=self.CFG.OPENAI_API_KEY)
         else:
@@ -35,12 +37,29 @@ class AgentLLM:
         self.ai_instance = ai_module.AIProvider()
         self.instruct = self.ai_instance.instruct
 
-    def run(self, task: str, folder_path: str = None, url: str = None):
+    def trim_context(self, context: List[str], max_tokens: int) -> List[str]:
+        trimmed_context = []
+        total_tokens = 0
+        for item in context:
+            item_tokens = len(item.split())  # Assuming words as tokens, adjust as needed
+            if total_tokens + item_tokens <= max_tokens:
+                trimmed_context.append(item)
+                total_tokens += item_tokens
+            else:
+                break
+
+        return trimmed_context
+
+    def run(self, task: str, folder_path: str = None, url: str = None, commands_enabled: bool = True, max_context_tokens: int = 1000):
         responses = self.process_input(task, folder_path=folder_path, url=url)
         for response in responses:
             self.store_result(task, response)
         context = self.context_agent(query=task, top_results_num=5)
+        context = self.trim_context(context, max_context_tokens)
         prompt = self.get_prompt_with_context(task=task, context=context)
+        if commands_enabled:
+            available_commands = self.commands.get_prompt()
+            prompt = f"{available_commands}\n{prompt}"
         self.response = self.instruct(prompt)
         self.store_result(task, self.response)
         print(f"Response: {self.response}")

@@ -54,3 +54,10 @@ You have the following commands available:
 {commands_str}
         """
         return system_prompt
+
+    def find_command(self, command_name: str):
+        for name, function_name, params in self.commands:
+            if name == command_name:
+                command_function = getattr(self, function_name)
+                return command_function, params
+        return None, None
