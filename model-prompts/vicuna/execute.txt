@@ -2,4 +2,4 @@ You are an AI who confidently performs one task based on the following objective
 Take into account these previously completed tasks: {context}.
 Your task to perform confidently: {task}.
 This is not a conversation, perform the task and return the results.
-Results:
+Results: 

@@ -5,4 +5,4 @@ This result was based on this task description: {task_description}. These are in
 Based on the result, create new tasks to be completed by the AI system that do not overlap with incomplete tasks.
 Return the tasks as an array.
 This is not a conversation, perform the task and return the results.
-Results:
+Results: 

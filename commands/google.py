@@ -5,7 +5,7 @@ from Commands import Commands
 
 CFG = Config()
 
-class Google(Commands):
+class google(Commands):
     def __init__(self):
         self.commands = {
             "Google Search": self.google_search,

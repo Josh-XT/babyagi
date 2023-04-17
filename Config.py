@@ -14,7 +14,9 @@ class Config():
         # AI Configuration
         self.AI_PROVIDER = os.getenv("AI_PROVIDER", "openai").lower()
         self.COMMANDS_ENABLED = os.getenv("COMMANDS_ENABLED", "true").lower() == "true"
-
+        self.WORKING_DIRECTORY = os.getenv("WORKING_DIRECTORY", "WORKSPACE")
+        if not os.path.exists(self.WORKING_DIRECTORY):
+            os.makedirs(self.WORKING_DIRECTORY)
         # Model configuration
         self.AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo").lower()
         self.AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", 0.4))
@@ -24,3 +26,7 @@ class Config():
 
         # OpenAI
         self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+        # Huggingface
+        self.HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+        self.HUGGINGFACE_AUDIO_TO_TEXT_MODEL = os.getenv("HUGGINGFACE_AUDIO_TO_TEXT_MODEL", "facebook/wav2vec2-large-960h-lv60-self")
