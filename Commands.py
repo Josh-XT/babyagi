@@ -33,6 +33,7 @@ class Commands:
 
     def get_prompt(self):
         self.commands = self.load_commands()
+        commands_str = ""
         for i, (command_name, command_function_name, params) in enumerate(self.commands, 1):
             formatted_params = {f"{k}": repr(v) for k, v in params.items()}
             commands_str += f'{i}. "{command_name}" - {command_function_name} {formatted_params}\n'
