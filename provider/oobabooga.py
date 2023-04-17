@@ -1,7 +1,6 @@
 import requests
 import json
 from Config import Config
-
 CFG = Config()
 
 class AIProvider:
@@ -36,8 +35,6 @@ class AIProvider:
         }).json()
         data = response['data'][0]
         # Replace all backslashes in data then return it
-        data = data.replace("\\", "")
-        # Split to show only the response
-        if "Response: " in data:
-            data = data.split("Response: ")[1]
+        data = data.replace("\\n", "\n")
+        data = data.replace("\\'", "'")
         return data
